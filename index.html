@@ -436,14 +436,14 @@ ul{margin:0;padding:0;list-style:none;}
 }
 .form-frame{
   border:1px solid var(--c-line);border-radius:var(--r-m);overflow:hidden;
-  background:var(--c-bg);min-height:600px;position:relative;
+  background:var(--c-bg);position:relative;
 }
 .form-frame iframe{
-  width:100%;height:640px;border:0;display:block;background:#fff;
+  width:100%;height:1800px;border:0;display:block;background:#fff;
 }
 /* 未配置表单时的占位 */
 .form-placeholder{
-  min-height:600px;display:flex;flex-direction:column;
+  min-height:420px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:40px 26px;gap:14px;
 }
 .form-placeholder svg{opacity:.5;}
@@ -634,9 +634,9 @@ ul{margin:0;padding:0;list-style:none;}
 
   .order-info{padding:30px 24px;}
   .form-panel{padding:24px 18px 28px;}
-  .form-frame{min-height:520px;}
-  .form-frame iframe{height:580px;}
-  .form-placeholder{min-height:420px;padding:32px 18px;}
+  .form-frame{min-height:0;}
+  .form-frame iframe{height:1900px;}
+  .form-placeholder{min-height:360px;padding:32px 18px;}
   .form-alt{flex-direction:column;align-items:stretch;}
   .form-alt .btn{width:100%;}
   .policies{grid-template-columns:1fr;gap:14px;margin-top:40px;}
@@ -1156,16 +1156,18 @@ const CONFIG = {
     story      : "assets/mengfu-3-bottle.jpg"
   },
 
-  /* 3) 飞书订购表单链接
-        —— 取法：飞书多维表格 → 表单视图 → 分享 → 复制链接（形如 https://xxx.feishu.cn/share/base/form/xxxxxx）
-        —— 也可以填飞书的"收集表"分享链接。
-        —— 填好后页面会自动以 iframe 嵌入；留空则显示占位提示并只提供跳转按钮。
-        注意：飞书表单页面默认可能禁止被 iframe 嵌套，若嵌入后出现空白，
-        请保留下方 JUMP_ONLY 模式（跳转填写），或联系表单管理员放开嵌入限制。 */
-  FEISHU_FORM_URL: "",                          // ← 把链接填在这里，例如 "https://xxx.feishu.cn/share/base/form/abcdefg"
+  /* 3) 飞书订购表单链接（已接入，改这里即可换表单）
+        表单：孟府盛宴·在线订购（飞书多维表格表单视图）
+        字段：收件人姓名 / 手机号 / 收货地址 / 所选酒款 / 数量 / 是否开票 / 备注
+        权限：公开访问 + 允许匿名提交（客户无需登录飞书即可填写）
+        数据落地：飞书多维表格「孟府盛宴·订购订单表」 */
+  FEISHU_FORM_URL: "https://my.feishu.cn/share/base/shrcn61bYblQd9Nx1Ca5Xkrq3fd",
 
-  /* 4) 表单嵌入高度（飞书表单较长时调大，移动端另有 CSS 控制） */
-  FORM_HEIGHT: 640,
+  /* 4) 表单嵌入高度
+        实测飞书该表单内容高约 1800px（PC）/ 1905px（移动端）。
+        这里给足高度，尽量避免 iframe 内部再出现滚动条；
+        不同表单长度不同，可自行增减。 */
+  FORM_HEIGHT: 1820,
 
   /* 5) 联系电话 / 客服信息（展示用） */
   CONTACT: {
@@ -1226,7 +1228,9 @@ const CONFIG = {
     iframe.loading = "lazy";
     iframe.title = "孟府盛宴订购表单";
     iframe.setAttribute("allow", "clipboard-write");
-    iframe.style.height = CONFIG.FORM_HEIGHT + "px";
+    // 移动端表单更长，按视口给足高度
+    const h = window.innerWidth <= 768 ? 1920 : CONFIG.FORM_HEIGHT;
+    iframe.style.height = h + "px";
     if (placeholder) placeholder.remove();
     frameBox.appendChild(iframe);
 
