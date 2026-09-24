@@ -387,6 +387,15 @@ ul{margin:0;padding:0;list-style:none;}
    ============================================================ */
 .order{background:linear-gradient(180deg,var(--c-bg-alt),#f0e4d0);}
 .order-grid{display:grid;grid-template-columns:1fr 1.12fr;gap:44px;align-items:start;}
+/* 左栏跟随滚动：表单很高，让流程与电话在填表全程可见，避免滚到中段时左侧全空。
+   top 值 = 顶部导航高度 + 呼吸间距；max-height 兜底防止卡片高于视口时底部被截断。 */
+.order-info-col{
+  position:sticky;top:92px;
+  max-height:calc(100dvh - 116px);
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.order-info-col::-webkit-scrollbar{display:none;}
 
 /* 左：订购说明 */
 .order-info{
@@ -425,22 +434,17 @@ ul{margin:0;padding:0;list-style:none;}
 
 /* 右：飞书表单容器 */
 .form-panel{
-  background:#fff;border-radius:var(--r-l);padding:30px 28px 34px;
+  background:#fff;border-radius:var(--r-l);padding:26px 26px 28px;
   box-shadow:var(--shadow-s);border:1px solid var(--c-line);
 }
 .form-panel-head{
   display:flex;align-items:flex-start;justify-content:space-between;
-  gap:14px;margin-bottom:8px;flex-wrap:wrap;
+  gap:14px;margin-bottom:18px;flex-wrap:wrap;
 }
 .form-panel-head h3{font-size:21px;color:var(--c-red-deep);}
 .form-panel-head p{font-size:13px;color:var(--c-ink-2);margin:6px 0 0;}
-.form-fields{
-  display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 20px;
-}
-.form-fields li{
-  font-size:12px;color:var(--c-red);background:rgba(155,28,28,.055);
-  border:1px solid rgba(155,28,28,.14);border-radius:999px;padding:3px 12px;
-}
+/* 表单已由 iframe 完整呈现字段，此处不再重复罗列胶囊标签（省一屏高度） */
+.form-fields{display:none;}
 .form-frame{
   border:1px solid var(--c-line);border-radius:var(--r-m);overflow:hidden;
   background:var(--c-bg);position:relative;
@@ -467,6 +471,32 @@ ul{margin:0;padding:0;list-style:none;}
 }
 .form-alt .btn{padding:12px 26px;font-size:14px;}
 .form-alt small{font-size:12.5px;color:var(--c-ink-2);line-height:1.7;}
+
+/* 表单下方常驻联系条（窄屏单列时左栏会滚出视口，这里兜底保证电话可及） */
+.order-help{
+  margin-top:16px;padding:14px 16px;border-radius:var(--r-m);
+  background:linear-gradient(120deg,rgba(109,15,20,.05),rgba(200,162,74,.1));
+  border:1px solid rgba(155,28,28,.16);
+  display:flex;align-items:center;gap:12px;
+}
+.order-help .oh-icon{
+  flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--c-red);color:var(--c-gold-lt);
+}
+.order-help .oh-text{flex:1 1 auto;min-width:0;display:grid;gap:2px;}
+.order-help em{font-style:normal;font-size:12px;color:var(--c-ink-2);letter-spacing:.04em;}
+.order-help a#ctPhoneAlt{
+  font-size:17px;font-weight:700;color:var(--c-red-deep);letter-spacing:.06em;
+  font-family:var(--font-sans);
+}
+.order-help .oh-btn{
+  flex:0 0 auto;padding:9px 18px;border-radius:999px;background:var(--c-red);
+  color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;
+  transition:background .2s ease,transform .2s ease;
+}
+.order-help .oh-btn:hover{background:var(--c-red-deep);transform:translateY(-1px);}
+/* 电话未配置时：按钮降级为不可点，视觉弱化 */
+.order-help.is-empty .oh-btn{opacity:.45;pointer-events:none;}
 
 /* 配送 / 售后 */
 .policies{
@@ -588,6 +618,8 @@ ul{margin:0;padding:0;list-style:none;}
   .story-visual{max-width:440px;margin:0 auto;width:100%;}
   .craft-grid{grid-template-columns:repeat(2,1fr);}
   .order-grid{grid-template-columns:1fr;gap:30px;}
+  /* 单列布局下 sticky 会让左栏盖住表单，必须关闭 */
+  .order-info-col{position:static;top:auto;}
   .prod{grid-template-columns:260px 1fr;}
   .foot-grid{grid-template-columns:1fr 1fr;gap:32px;}
 }
@@ -653,6 +685,10 @@ ul{margin:0;padding:0;list-style:none;}
   .form-placeholder{min-height:360px;padding:32px 18px;}
   .form-alt{flex-direction:column;align-items:stretch;}
   .form-alt .btn{width:100%;}
+  /* 移动端联系条：图标+文案一行，按钮独占一行，方便拇指点击 */
+  .order-help{flex-wrap:wrap;gap:10px;padding:14px;}
+  .order-help .oh-text{flex:1 1 140px;}
+  .order-help .oh-btn{flex:1 1 100%;text-align:center;padding:12px 18px;font-size:14px;}
   .policies{grid-template-columns:1fr;gap:14px;margin-top:40px;}
   .policy{padding:22px 20px;}
 
@@ -957,7 +993,8 @@ ul{margin:0;padding:0;list-style:none;}
 
     <div class="order-grid">
 
-      <!-- 左侧订购流程 -->
+      <!-- 左侧订购流程（跟随滚动，填表时电话与流程始终可见） -->
+      <div class="order-info-col">
       <aside class="order-info reveal">
         <h3>订购流程</h3>
         <p class="oi-sub">ORDER &amp; DELIVERY</p>
@@ -997,25 +1034,16 @@ ul{margin:0;padding:0;list-style:none;}
           <span><em>企业团购</em>支持批量采购与定制礼盒</span>
         </div>
       </aside>
+      </div>
 
       <!-- 右侧飞书表单 -->
       <div class="form-panel reveal">
         <div class="form-panel-head">
           <div>
             <h3>在线订购表单</h3>
-            <p>由飞书收集表承载，提交后数据实时进入多维表格，无需注册账号。</p>
+            <p>填写提交即进入我们的订单表，24 小时内电话与您确认，无需注册账号。</p>
           </div>
         </div>
-
-        <ul class="form-fields" aria-label="表单包含字段">
-          <li>收件人姓名</li>
-          <li>手机号</li>
-          <li>收货地址</li>
-          <li>所选酒款</li>
-          <li>数量</li>
-          <li>是否开票</li>
-          <li>备注</li>
-        </ul>
 
         <!-- 表单容器：JS 会依据 FEISHU_FORM_URL 决定嵌入 iframe 还是显示占位 -->
         <div class="form-frame" id="formFrame">
@@ -1033,6 +1061,20 @@ ul{margin:0;padding:0;list-style:none;}
         <div class="form-alt">
           <a class="btn btn-primary" id="formJumpBtn" href="#order">在新窗口打开订购表单</a>
           <small>若表单无法正常显示，可点击左侧按钮跳转填写，或直接致电客服下单。</small>
+        </div>
+
+        <!-- 表单下方的常驻联系条：窄屏单列时左栏已滚出视口，这里保证电话始终可及 -->
+        <div class="order-help">
+          <span class="oh-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+            </svg>
+          </span>
+          <span class="oh-text">
+            <em>不想填表？直接电话下单</em>
+            <a id="ctPhoneAlt" href="#order">请替换为您的联系电话</a>
+          </span>
+          <a class="oh-btn" id="ctPhoneAltBtn" href="#order">立即拨打</a>
         </div>
       </div>
     </div>
@@ -1225,7 +1267,7 @@ const CONFIG = {
   setImg(document.querySelector(".story-visual img"), CONFIG.IMAGES.story);
 
   /* ---------- 2. 注入联系电话（展示 + 点击拨号） ---------- */
-  const ctEls = ["ctPhone", "ctPhoneFoot", "ctPhoneFootNav"]
+  const ctEls = ["ctPhone", "ctPhoneFoot", "ctPhoneFootNav", "ctPhoneAlt", "ctPhoneAltBtn"]
     .map(function (id) { return document.getElementById(id); })
     .filter(Boolean);
 
@@ -1237,9 +1279,12 @@ const CONFIG = {
 
     ctEls.forEach(function (el) {
       if (el.id === "ctPhoneFootNav") {
-        // 导航栏文案形式：电话订购（137…）
+        // 页脚导航项：电话订购（137…）
         el.textContent = CONFIG.CONTACT.phone ? "电话订购 " + CONFIG.CONTACT.phone : "电话订购";
         if (CONFIG.CONTACT.phone) el.classList.add("foot-tel-link");
+      } else if (el.id === "ctPhoneAltBtn") {
+        // 联系条按钮：文案固定，走 tel: 链接
+        el.textContent = "立即拨打";
       } else {
         el.textContent = phoneText;
       }
@@ -1252,6 +1297,12 @@ const CONFIG = {
         el.style.fontWeight = "400";
       }
     });
+
+    // 电话未配置时，把联系条整体弱化（避免出现一个点不动的红色按钮）
+    if (!telHref) {
+      const helpBar = document.querySelector(".order-help");
+      if (helpBar) helpBar.classList.add("is-empty");
+    }
   }
 
   /* ---------- 3. 飞书表单：能嵌就嵌，不能嵌就跳转 ---------- */
