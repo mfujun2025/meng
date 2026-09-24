@@ -415,6 +415,13 @@ ul{margin:0;padding:0;list-style:none;}
 }
 .order-contact span{display:flex;gap:9px;align-items:baseline;opacity:.9;}
 .order-contact em{font-style:normal;opacity:.62;font-size:12.5px;min-width:52px;}
+/* 联系电话：深底上要高对比，且可点击拨号 */
+.order-contact #ctPhone{
+  color:var(--c-gold-lt);font-weight:600;font-size:15px;letter-spacing:.08em;
+  border-bottom:1px dashed rgba(230,207,148,.5);padding-bottom:1px;
+  transition:opacity .2s ease,border-color .2s ease;
+}
+.order-contact #ctPhone:hover{opacity:.8;border-bottom-color:var(--c-gold-lt);}
 
 /* 右：飞书表单容器 */
 .form-panel{
@@ -532,6 +539,13 @@ ul{margin:0;padding:0;list-style:none;}
 .foot ul{display:grid;gap:9px;}
 .foot ul a{color:rgba(255,255,255,.62);font-size:13.5px;transition:color .2s ease;}
 .foot ul a:hover{color:var(--c-gold-lt);}
+.foot-tel{margin-top:4px;}
+.foot-tel a,.foot ul a.foot-tel-link{
+  color:var(--c-gold-lt);font-weight:600;letter-spacing:.08em;
+  border-bottom:1px dashed rgba(230,207,148,.45);padding-bottom:1px;
+  transition:opacity .2s ease,border-color .2s ease;
+}
+.foot-tel a:hover,.foot ul a.foot-tel-link:hover{opacity:.82;border-bottom-color:var(--c-gold-lt);}
 .foot-bottom{
   padding-top:22px;display:flex;flex-wrap:wrap;gap:10px 20px;
   justify-content:space-between;font-size:12px;color:rgba(255,255,255,.42);
@@ -978,7 +992,7 @@ ul{margin:0;padding:0;list-style:none;}
           </li>
         </ul>
         <div class="order-contact">
-          <span><em>订购咨询</em><!-- PHONE_PLACEHOLDER --><b id="ctPhone">请替换为您的联系电话</b></span>
+          <span><em>订购咨询</em><a id="ctPhone" href="#order">请替换为您的联系电话</a></span>
           <span><em>服务时间</em>每日 09:00 – 21:00</span>
           <span><em>企业团购</em>支持批量采购与定制礼盒</span>
         </div>
@@ -1097,6 +1111,10 @@ ul{margin:0;padding:0;list-style:none;}
           出品：贵州茅台镇大福酒业（集团）有限公司<br>
           品牌入口：孟.cn
         </p>
+        <p class="foot-tel">
+          订购电话：<a id="ctPhoneFoot" href="#order">请替换为您的联系电话</a><br>
+          服务时间：每日 09:00 – 21:00
+        </p>
       </div>
       <div>
         <h5>快速导航</h5>
@@ -1111,6 +1129,7 @@ ul{margin:0;padding:0;list-style:none;}
         <h5>订购方式</h5>
         <ul>
           <li><a href="#order">在线订购表单</a></li>
+          <li><a id="ctPhoneFootNav" href="#order">电话订购</a></li>
           <li><a href="#order">企业团购咨询</a></li>
           <li><a href="#service">发票说明</a></li>
           <li><a href="#service">破损包赔政策</a></li>
@@ -1171,8 +1190,9 @@ const CONFIG = {
 
   /* 5) 联系电话 / 客服信息（展示用） */
   CONTACT: {
-    phone: "",                                  // 例如 "400-000-0000"
-    wechat: "",                                 // 微信号（留空则不显示）
+    phone: "137-6442-7878",                      // 展示用（带分隔符更易读）
+    phoneRaw: "13764427878",                     // 拨号用（纯数字，勿加分隔符）
+    wechat: "",                                  // 微信号（留空则不显示）
     hours: "每日 09:00 – 21:00"
   },
 
@@ -1204,16 +1224,34 @@ const CONFIG = {
     .forEach(function (src, i) { setImg(prodImgs[i], src); });
   setImg(document.querySelector(".story-visual img"), CONFIG.IMAGES.story);
 
-  /* ---------- 2. 注入联系电话 ---------- */
-  const ct = document.getElementById("ctPhone");
-  if (ct) {
-    if (CONFIG.CONTACT.phone) {
-      ct.textContent = CONFIG.CONTACT.phone;
-    } else {
-      ct.textContent = "请替换为您的联系电话";
-      ct.style.opacity = ".72";
-      ct.style.fontWeight = "400";
-    }
+  /* ---------- 2. 注入联系电话（展示 + 点击拨号） ---------- */
+  const ctEls = ["ctPhone", "ctPhoneFoot", "ctPhoneFootNav"]
+    .map(function (id) { return document.getElementById(id); })
+    .filter(Boolean);
+
+  if (ctEls.length) {
+    const phoneText = CONFIG.CONTACT.phone || "请替换为您的联系电话";
+    const telHref = CONFIG.CONTACT.phoneRaw
+      ? "tel:" + String(CONFIG.CONTACT.phoneRaw).replace(/[^\d+]/g, "")
+      : (CONFIG.CONTACT.phone ? "tel:" + String(CONFIG.CONTACT.phone).replace(/[^\d+]/g, "") : "");
+
+    ctEls.forEach(function (el) {
+      if (el.id === "ctPhoneFootNav") {
+        // 导航栏文案形式：电话订购（137…）
+        el.textContent = CONFIG.CONTACT.phone ? "电话订购 " + CONFIG.CONTACT.phone : "电话订购";
+        if (CONFIG.CONTACT.phone) el.classList.add("foot-tel-link");
+      } else {
+        el.textContent = phoneText;
+      }
+      if (telHref) {
+        el.href = telHref;
+        el.setAttribute("aria-label", "拨打电话 " + phoneText);
+      } else {
+        el.removeAttribute("href");
+        el.style.opacity = ".72";
+        el.style.fontWeight = "400";
+      }
+    });
   }
 
   /* ---------- 3. 飞书表单：能嵌就嵌，不能嵌就跳转 ---------- */
